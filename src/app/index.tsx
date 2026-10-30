@@ -1,98 +1,123 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+
+import LoadingData from '@/components/ui/LoadingData';
+import Header from "../components/Header";
+import Items from "../components/Items";
+import Pagination from "../components/Pagination";
+import EmptyData from '../components/ui/EmptyData';
+import ErrorData from '../components/ui/ErrorData';
+
+type  CommentUser = {
+    id: number,
+    username: string,
+    fullName: string
 }
+
+export type Comment = {
+    id: number,
+    body: string,
+    postId?: number,
+    likes: number,
+    user: CommentUser
+}
+
+export type CommentResponse = {
+    comments: Array<Comment>
+    total: number,
+    skip: number,
+    limit: number
+}
+
+
+let PAGE_SIZE = 10
+
+const delay = 1201
 
 export default function HomeScreen() {
+
+
+  const [comments, setComments] = useState<Comment[]>([])
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [total, setTotal] = useState<number>(0)
+
+
+  const totalPages = Math.ceil(total/PAGE_SIZE)  
+
+  const skip = (currentPage-1) * PAGE_SIZE
+
+  const url = `https://dummyjson.com/comments?limit=${PAGE_SIZE}&skip=${skip}&delay=${delay}`
+
+
+  useEffect (()=> {
+    const controller = new AbortController();
+
+    async function loadCommentsData() {
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const skip = (currentPage-1) * PAGE_SIZE
+        const response = await fetch(url,{signal: controller.signal})
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+
+        const data: CommentResponse = await response.json()
+
+        setComments(data.comments)
+        setTotal(data.total)
+      }
+
+      catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return
+        }
+      
+        setError("Упс, не удалось загрузить CommentResponse")
+      }
+
+      finally {
+        setLoading(false)
+      }
+
+    }
+    loadCommentsData()
+
+    return () => controller.abort()
+
+  },[currentPage]) 
+
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style = {styles.container}>
+      <Header/>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+    { loading ?
+      (<LoadingData/>) : error ? (
+    <ErrorData/> 
+  ) : (comments.length === 0 || PAGE_SIZE === 0) ? (<EmptyData/>) : (
+        <Items comments = {comments}/>)}
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
+      <Pagination loading = {loading} currentPage={currentPage} setCurrentPage = {setCurrentPage} totalPages = {totalPages}/>
+    
+    </SafeAreaView>
+  )
 }
+
 
 const styles = StyleSheet.create({
   container: {
+    position: "relative",
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
+    backgroundColor: "#8bd89c",
+  }
+
+})

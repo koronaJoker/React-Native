@@ -1,56 +1,270 @@
-# Welcome to your Expo app 👋
+Конечно. Ниже готовый `README.md` под твой проект с `DummyJSON Comments`, TypeScript и пагинацией. Скриншоты просто положи в репозиторий и назови их `page-1.png` и `page-2.png`.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+````md
+# React Native Comments App
 
-## Get started
+React Native приложение для загрузки и отображения комментариев с использованием DummyJSON API.
 
-1. Install dependencies
+## 1. Git-репозиторий
 
-   ```bash
-   npm install
-   ```
+GitHub:
+https://github.com/koronaJoker/REPOSITORY_NAME
 
-2. Start the app
+## 2. Описание API-ресурса
 
-   ```bash
-   npx expo start
-   ```
+Для получения комментариев используется API:
 
-In the output, you'll find options to open the app in a
+https://dummyjson.com/comments
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Приложение получает комментарии с поддержкой пагинации.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Для ограничения количества записей на странице используются параметры:
 
-## Get a fresh project
+- `limit` — количество комментариев на странице;
+- `skip` — количество пропущенных комментариев;
+- `delay` — искусственная задержка ответа сервера для демонстрации состояния `loading`.
 
-When you're ready, run:
+Пример запроса:
 
-```bash
-npm run reset-project
+```text
+https://dummyjson.com/comments?limit=10&skip=10&delay=1000
+````
+
+В данном примере:
+
+* `limit=10` — получить 10 комментариев;
+* `skip=10` — пропустить первые 10 комментариев;
+* `delay=1000` — задержка ответа 1000 мс.
+
+## 3. TypeScript types
+
+### CommentUser
+
+Тип пользователя, который написал комментарий:
+
+```ts
+type CommentUser = {
+    id: number,
+    username: string,
+    fullName: string
+}
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Comment
 
-### Other setup steps
+Тип одного комментария:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```ts
+type Comment = {
+    id: number,
+    body: string,
+    postId: number,
+    likes: number,
+    user: CommentUser
+}
+```
 
-## Learn more
+### CommentResponse
 
-To learn more about developing your project with Expo, look at the following resources:
+Тип ответа API:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```ts
+type CommentResponse = {
+    comments: Comment[],
+    total: number,
+    skip: number,
+    limit: number
+}
+```
 
-## Join the community
+Таким образом, API возвращает массив комментариев `comments`, общее количество комментариев `total`, количество пропущенных записей `skip` и количество записей на странице `limit`.
 
-Join our community of developers creating universal apps.
+## 4. Успешно загруженная страница
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Скриншот первой страницы:
+
+
+
+На странице отображается список полученных комментариев и номер текущей страницы.
+
+## 5. Вторая страница
+
+Скриншот второй страницы:
+
+
+После нажатия кнопки `Вперед` изменяется номер страницы и загружается следующая группа комментариев.
+
+## 6. Состояния UI
+
+В приложении реализованы четыре состояния:
+
+### Loading
+
+Показывается во время загрузки данных с API.
+
+![alt text](images/photo_1_2026-10-03_03-05-09.jpg)
+
+
+```text
+Загрузка...
+```
+
+### Error
+
+Показывается, если при запросе произошла ошибка.
+
+```text
+Не удалось загрузить комментарии
+```
+
+![alt text](images/photo_5_2026-10-03_03-05-09.jpg)
+
+### Empty
+
+Показывается, если запрос успешно выполнен, но API не вернул комментариев.
+
+```text
+Список комментариев пуст
+```
+
+### Success
+
+Показывается после успешного получения комментариев.
+
+В этом состоянии отображается список комментариев.
+
+## 7. Пагинация
+
+Для перехода между страницами используются:
+
+* кнопка `Назад`;
+* номер текущей страницы;
+* общее количество страниц;
+* кнопка `Вперед`.
+
+Кнопка `Назад` отключается на первой странице.
+
+Кнопка `Вперед` отключается на последней странице.
+
+Во время загрузки обе кнопки отключаются.
+
+Пример:
+
+```text
+Назад        2 / 5        Вперед
+```
+
+## 8. Цепочка работы приложения
+
+Основная цепочка загрузки данных:
+
+```text
+setPage
+   ↓
+render
+   ↓
+useEffect
+   ↓
+fetch
+   ↓
+setItems
+   ↓
+render
+```
+
+### 1. setPage
+
+При нажатии кнопки пагинации изменяется номер страницы:
+
+```ts
+setCurrentPage(prev => prev + 1)
+```
+
+### 2. render
+
+React Native обнаруживает изменение состояния и выполняет повторный render компонента.
+
+### 3. useEffect
+
+После изменения `currentPage` срабатывает `useEffect`:
+
+```ts
+useEffect(() => {
+    loadComments();
+}, [currentPage]);
+```
+
+### 4. fetch
+
+Выполняется запрос к API.
+
+```ts
+const response = await fetch(url);
+const result = await response.json();
+```
+
+### 5. setComments
+
+Полученные данные сохраняются в state:
+
+```ts
+setData(result);
+```
+
+### 6. render
+
+После изменения state React Native снова выполняет render.
+
+На экране отображаются новые комментарии и обновляется номер страницы.
+
+## 9. Формирование запроса
+
+Номер страницы используется для вычисления `skip`:
+
+```ts
+const skip = (currentPage - 1) * PAGE_SIZE;
+```
+
+Например, при `PAGE_SIZE = 10`:
+
+```text
+Страница 1 → skip = 0
+Страница 2 → skip = 10
+Страница 3 → skip = 20
+Страница 4 → skip = 30
+```
+
+После этого формируется URL:
+
+```ts
+const url =
+    `https://dummyjson.com/comments?limit=${PAGE_SIZE}&skip=${skip}&delay=${delay}`;
+```
+
+Таким образом, каждая страница получает свою часть комментариев.
+
+## 10. Используемые технологии
+
+* React Native
+* TypeScript
+* Expo
+* DummyJSON API
+* Fetch API
+* React Hooks (`useState`, `useEffect`)
+* `Pressable`
+* `ScrollView`
+* `StyleSheet`
+
+## 11. Результат
+
+В результате разработано React Native приложение, которое:
+
+* получает данные из внешнего API;
+* отображает список комментариев;
+* использует TypeScript types;
+* поддерживает пагинацию;
+* отображает состояния `loading`, `error`, `empty` и `success`;
+* отключает кнопки пагинации в соответствующих состояниях;
+* загружает новые данные при изменении страницы.
+
+
