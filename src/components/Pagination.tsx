@@ -40,19 +40,14 @@ export default function Pagination ({currentPage, setCurrentPage, totalPages, lo
 } 
  
 const styles = StyleSheet.create({ 
-    pagination: { 
-        position: "absolute", 
-        bottom: 40, 
-        left: 0, 
-        right: 0, 
-        backgroundColor: "#8bd89caa", 
- 
-        flexDirection: "row", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        padding: 20, 
-        
-    }, 
+pagination: {
+  backgroundColor: "#fff",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingVertical: 20,
+  paddingHorizontal: 30,
+},
  
     bold: { 
         fontWeight: 900, 
