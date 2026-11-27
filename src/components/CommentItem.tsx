@@ -1,84 +1,104 @@
+
+import FavoriteButton from "@/components/FavoriteButton";
 import { CommentData } from "@/types/comments";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
+type Props = {
+    comment: CommentData
+}
 
-export default function CommentItem ({id, user, body, likes, postId}: CommentData) {
+export default function CommentItem({ comment }: Props) {
 
-    const {width} = useWindowDimensions()
+    const { width } = useWindowDimensions()
 
-     const commentWidth = width > 768 ? width * 0.85 : width * 0.95;
-
+    const commentWidth = width > 768 ? width * 0.85 : width * 0.95
 
     return (
-        <View style={[styles.comment, {width: commentWidth}]}>
-          <Text style={styles.postId}>{postId}</Text>
+        <View style={[styles.comment, { width: commentWidth }]}>
 
-          <Text style={styles.username}>{user.fullName}</Text>
+            <View style={styles.header}>
+                <Text style={styles.postId}>
+                    Post #{comment.postId}
+                </Text>
 
-          <Text style={styles.body}>{body}</Text>
+                <FavoriteButton comment={comment} />
+            </View>
 
-          <View style={styles.flex}>
-              <Text style={styles.date}>12.12.2026</Text>
-              <Text style={styles.likes}>{likes} likes</Text>
-          </View>
+            <Text style={styles.username}>
+                {comment.user.fullName}
+            </Text>
+
+            <Text style={styles.body}>
+                {comment.body}
+            </Text>
+
+            <View style={styles.flex}>
+                <Text style={styles.date}>12.12.2026</Text>
+
+                <Text style={styles.likes}>
+                    {comment.likes} likes
+                </Text>
+            </View>
 
         </View>
-    
     )
 }
 
 const styles = StyleSheet.create({
 
-  comment: {
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    minHeight: 300,
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 8,
-    boxShadow: "0px 0px 10px rgba(0,0,0, 0.2)",
-  },
+    comment: {
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.2)",
+        minHeight: 300,
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 8,
+        boxShadow: "0px 0px 10px rgba(0,0,0, 0.2)",
+    },
 
-  username: {
-    borderBottomWidth: 2,
-    borderColor: "#000",
-    fontWeight: "700",
-    color: "#000",
-    fontSize: 18,
-    paddingBottom: 10,
-  },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+    },
 
-  likes: {
-    fontWeight: "900",
-    color: "#000",
-  },
+    username: {
+        borderBottomWidth: 2,
+        borderColor: "#000",
+        fontWeight: "700",
+        color: "#000",
+        fontSize: 18,
+        paddingBottom: 10,
+    },
 
-  date: {
-    fontWeight: "300",
-    fontStyle: "italic",
-    color: "#a7a6b8",
-  },
+    likes: {
+        fontWeight: "900",
+        color: "#000",
+    },
 
-  body: {
-    padding: 10,
-    fontWeight: "200",
-    color: "#000",
-    // backgroundColor: "rgb(56, 70, 120)",
-    minHeight: 150,
-    borderRadius: 5,
-  },
+    date: {
+        fontWeight: "300",
+        fontStyle: "italic",
+        color: "#a7a6b8",
+    },
 
-  flex: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
+    body: {
+        padding: 10,
+        fontWeight: "200",
+        color: "#000",
+        minHeight: 150,
+        borderRadius: 5,
+    },
 
-  postId: {
-    position: "absolute",
-    right: 15,
-    top: 15,
-    fontSize: 9,
-    color: "#fff",
-  },
+    flex: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    postId: {
+        fontSize: 12,
+        color: "#888",
+    },
 })

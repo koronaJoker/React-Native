@@ -41,11 +41,7 @@ export default function CommentDetails() {
         <View style = {styles.container}>
             {/* <Stack.Screen options={{ title: comment.body }} /> */}
             <CommentItem
-                id = {Number(comment.id)}
-                user={comment.user}
-                body = {comment.body}
-                likes = {comment.likes}
-                postId={comment.postId}
+                comment = {comment}
             />
         </View>
     )

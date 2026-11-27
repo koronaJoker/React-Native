@@ -29,11 +29,7 @@ export default function CommentList ({comments} : ItemProps) {
                         style={styles.link}
                         >
                     <CommentItem
-                        id = {item.id}
-                        user={item.user}
-                        body = {item.body}
-                        likes = {item.likes}
-                        postId={item.postId}
+                        comment = {item}
                     />
                     </Link>
                 </View>
