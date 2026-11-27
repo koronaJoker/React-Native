@@ -1,8 +1,8 @@
-import { Comment } from "@/types/types";
+import { CommentData } from "@/types/comments";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 
-export default function Item ({id, user, body, likes, postId}: Comment) {
+export default function CommentItem ({id, user, body, likes, postId}: CommentData) {
 
     const {width} = useWindowDimensions()
 

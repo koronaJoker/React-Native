@@ -4,7 +4,7 @@ export type CommentUser = {
     fullName: string
 }
 
-export type Comment = {
+export type CommentData = {
     id: number,
     body: string,
     postId?: number,
@@ -13,7 +13,7 @@ export type Comment = {
 }
 
 export type CommentResponse = {
-    comments: Array<Comment>
+    comments: Array<CommentData>
     total: number,
     skip: number,
     limit: number

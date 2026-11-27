@@ -1,15 +1,15 @@
-import { Comment } from "@/types/types";
+import { CommentData } from "@/types/comments";
 import { Link } from "expo-router";
 import { FlatList, StyleSheet, View } from "react-native";
-import Item from "./Item";
+import CommentItem from "./CommentItem";
 import EmptyData from "./ui/EmptyData";
 
 
 type ItemProps = {
-    comments: Comment[]
+    comments: CommentData[]
 }
 
-export default function Items ({comments} : ItemProps) {   
+export default function CommentList ({comments} : ItemProps) {   
 
 
 
@@ -28,7 +28,7 @@ export default function Items ({comments} : ItemProps) {
                         }}
                         style={styles.link}
                         >
-                    <Item
+                    <CommentItem
                         id = {item.id}
                         user={item.user}
                         body = {item.body}

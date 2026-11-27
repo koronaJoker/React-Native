@@ -1,56 +1,17 @@
-import Item from "@/components/Item";
-import { Comment } from "@/types/types";
+import CommentItem from "@/components/CommentItem";
+import useComment from "@/hooks/useComment";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-
 
 
 export default function CommentDetails() {
 
     const { id } = useLocalSearchParams<{ id: string }>();
+    const parsedId = Number(id)
+    const commentId = Number.isFinite(parsedId) ? parsedId : null
 
+    const {comment, loading, error} = useComment(commentId)
     
-    const [comment, setComment] = useState<Comment | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect (()=> {
-
-    const controller = new AbortController();
-
-    async function loadCommentData() {
-
-      try {
-        const response = await fetch(`https://dummyjson.com/comments/${id}`,{signal: controller.signal})
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
-        }
-
-        const data: Comment = await response.json()
-
-        setComment(data)
-      }
-
-      catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          return
-        }
-      
-        setError("Упс, не удалось загрузить Comment")
-      }
-
-      finally {
-        setLoading(false)
-      }
-
-    }
-    loadCommentData()
-
-    return () => controller.abort()
-
-  }, [id])
 
     if (loading) {
     return (
@@ -78,7 +39,8 @@ export default function CommentDetails() {
 
     return (
         <View style = {styles.container}>
-            <Item
+            {/* <Stack.Screen options={{ title: comment.body }} /> */}
+            <CommentItem
                 id = {Number(comment.id)}
                 user={comment.user}
                 body = {comment.body}

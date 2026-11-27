@@ -13,6 +13,8 @@ type Props = {
     onCreate: (comment: Comment) => void;
 }
 
+
+
 export default function AddCommentScreen({onCreate} : Props) {
 
     const router = useRouter();

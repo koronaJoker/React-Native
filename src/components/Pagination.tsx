@@ -1,20 +1,19 @@
-import { type Dispatch, type SetStateAction } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
  
  
  
 type PaginationProps = { 
-    currentPage: number, 
-    setCurrentPage: Dispatch<SetStateAction<number>>, 
+    page: number, 
     totalPages: number, 
     loading: boolean,
- 
+    onPrevious : () => void,
+    onNext: () => void,
 } 
  
-export default function Pagination ({currentPage, setCurrentPage, totalPages, loading} : PaginationProps) { 
+export default function Pagination ({onPrevious, onNext, page, totalPages, loading} : PaginationProps) { 
  
-    const previousDisabled = currentPage === 1 || loading; 
-    const nextDisabled = currentPage >= totalPages || loading; 
+    const previousDisabled = page === 1 || loading; 
+    const nextDisabled = page >= totalPages || loading; 
  
  
     return ( 
@@ -22,16 +21,16 @@ export default function Pagination ({currentPage, setCurrentPage, totalPages, lo
             <Pressable 
                 disabled = {previousDisabled} 
                 style = {previousDisabled && styles.disabled} 
-                onPress = {() => setCurrentPage(prev => prev - 1)}> 
+                onPress = {onPrevious}> 
                 <Text style = {styles.bold}>Назад</Text> 
             </Pressable> 
  
-            <Text style={styles.bold}>{currentPage} / {totalPages}</Text> 
+            <Text style={styles.bold}>{page} / {totalPages}</Text> 
  
             <Pressable 
                 style = {nextDisabled && styles.disabled} 
                 disabled = {nextDisabled} 
-                onPress = {() => setCurrentPage(prev => prev + 1)}> 
+                onPress = {onNext}> 
                 <Text  style = {styles.bold}>Вперед</Text> 
             </Pressable> 
         </View> 

@@ -1,82 +1,25 @@
 import { useRouter } from "expo-router";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Comment, CommentResponse } from '@/types/types';
 
 import ErrorData from "@/components/ui/ErrorData";
+import useComments from "@/hooks/useComments";
+import CommentList from "../../components/CommentList";
 import Header from "../../components/Header";
-import Items from "../../components/Items";
 import Pagination from "../../components/Pagination";
 
-
-
-
-let PAGE_SIZE = 5
-
-const delay = 0
-
 export default function HomeScreen() {
+  const [page, setPage] = useState<number>(1)
+
+  const { comments, loading, error, total, pageSize } = useComments(page)
+  const [search, setSearch] = useState('');
+
+  const totalPages = Math.ceil(total / pageSize)
 
   const router = useRouter()
-
-  const [comments, setComments] = useState<Comment[]>([])
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null)
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [total, setTotal] = useState<number>(0)
-  const [search, setSearch] = useState<string>('');
-
-  const totalPages = Math.ceil(total/PAGE_SIZE)  
-
-  const skip = (currentPage-1) * PAGE_SIZE
-
-  const url = `https://dummyjson.com/comments?limit=${PAGE_SIZE}&skip=${skip}&delay=${delay}`
-
-
-  useEffect (()=> {
-    const controller = new AbortController();
-
-    async function loadCommentsData() {
-
-      setLoading(true)
-      setError(null)
-
-      try {
-        //const skip = (currentPage-1) * PAGE_SIZE
-        const response = await fetch(url,{signal: controller.signal})
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
-        }
-
-        const data: CommentResponse = await response.json()
-
-        setComments(data.comments)
-        setTotal(data.total)
-      }
-
-      catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          return
-        }
-      
-        setError("Упс, не удалось загрузить CommentResponse")
-      }
-
-      finally {
-        setLoading(false)
-      }
-
-    }
-    loadCommentsData()
-
-    return () => controller.abort()
-
-  },[currentPage]) 
-
 
   const filteredComments = comments.filter(comment =>
     comment.body.toLowerCase().includes(search.toLowerCase())
@@ -100,7 +43,7 @@ export default function HomeScreen() {
       {
         error
           ? (<ErrorData/>)
-          : (<Items comments = {filteredComments}/>) 
+          : (<CommentList comments = {filteredComments}/>) 
 
       }
 
@@ -112,9 +55,13 @@ export default function HomeScreen() {
       />
     
 
-      <Pagination loading = {loading} currentPage={currentPage} setCurrentPage = {setCurrentPage} totalPages = {totalPages}/>
+      <Pagination 
+        loading = {loading}
+        page={page}
+        onPrevious = {() => setPage(prev =>Math.max(1, prev-1))}
+        onNext = {() => setPage(prev => prev + 1)}
+        totalPages = {totalPages}/>
 
-    
     </SafeAreaView>
   )
 }
