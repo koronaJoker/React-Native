@@ -1,11 +1,32 @@
 
-import CommentItem from "@/components/CommentItem"
-import useFavorites from "@/hooks/useFavorites"
-import Ionicons from "@expo/vector-icons/Ionicons"
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native"
+import ClearFavoritesButton from "@/components/buttons/ClearFavoritesButton";
+import CommentItem from "@/components/CommentItem";
+import { useFavoritesContext } from "@/context/FavoritesContext";
+
+import {
+    FlatList,
+    StyleSheet,
+    Text,
+    View
+} from "react-native";
 
 export default function FavoritesScreen() {
-    const { favorites, clearFavorites } = useFavorites()
+    const {
+        favorites,
+        clearFavorites,
+        loading,
+        putLike
+    } = useFavoritesContext();
+
+    if (loading) {
+        return (
+            <View style={styles.emptyList}>
+                <Text style={styles.emptyText}>
+                    Загрузка избранного...
+                </Text>
+            </View>
+        );
+    }
 
     return (
         <FlatList
@@ -13,7 +34,7 @@ export default function FavoritesScreen() {
             keyExtractor={item => String(item.id)}
             renderItem={({ item }) => (
                 <View style={styles.item}>
-                    <CommentItem comment={item} />
+                    <CommentItem comment={item} onLike={() => putLike(item.id)} />
                 </View>
             )}
             contentContainerStyle={[
@@ -27,23 +48,10 @@ export default function FavoritesScreen() {
                             Favorites ({favorites.length})
                         </Text>
 
-                        <Pressable
+                        <ClearFavoritesButton
                             onPress={clearFavorites}
-                            style={({ pressed }) => [
-                                styles.clearButton,
-                                pressed && styles.clearButtonPressed
-                            ]}
-                        >
-                            <Ionicons
-                                name="trash-outline"
-                                size={17}
-                                color="#fff"
-                            />
-
-                            <Text style={styles.clearButtonText}>
-                                Clear all
-                            </Text>
-                        </Pressable>
+                            disabled={loading}
+                        />
                     </View>
                 ) : undefined
             }
@@ -63,7 +71,7 @@ export default function FavoritesScreen() {
             }
             showsVerticalScrollIndicator={false}
         />
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -146,4 +154,4 @@ const styles = StyleSheet.create({
         textAlign: "center",
         lineHeight: 21,
     },
-})
+});

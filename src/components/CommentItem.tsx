@@ -1,17 +1,23 @@
 
-import FavoriteButton from "@/components/FavoriteButton";
-import { CommentData } from "@/types/comments";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import FavoriteButton from "@/components/buttons/FavoriteButton";
+import type { CommentData } from "@/types/comments";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions
+} from "react-native";
 
 type Props = {
-    comment: CommentData
-}
+    comment: CommentData;
+    onLike?: () => void;
+};
 
-export default function CommentItem({ comment }: Props) {
+export default function CommentItem({ comment, onLike }: Props) {
+    const { width } = useWindowDimensions();
 
-    const { width } = useWindowDimensions()
-
-    const commentWidth = width > 768 ? width * 0.85 : width * 0.95
+    const commentWidth = width > 768 ? width * 0.85 : width * 0.95;
 
     return (
         <View style={[styles.comment, { width: commentWidth }]}>
@@ -33,19 +39,34 @@ export default function CommentItem({ comment }: Props) {
             </Text>
 
             <View style={styles.flex}>
-                <Text style={styles.date}>12.12.2026</Text>
-
-                <Text style={styles.likes}>
-                    {comment.likes} likes
+                <Text style={styles.date}>
+                    12.12.2026
                 </Text>
+
+                {onLike ? (
+                    <Pressable
+                        onPress={onLike}
+                        style={({ pressed }) => [
+                            styles.likeButton,
+                            pressed && styles.likeButtonPressed
+                        ]}
+                    >
+                        <Text style={styles.likes}>
+                            ♥ {comment.likes} likes
+                        </Text>
+                    </Pressable>
+                ) : (
+                    <Text style={styles.likes}>
+                        {comment.likes} likes
+                    </Text>
+                )}
             </View>
 
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-
     comment: {
         borderWidth: 1,
         borderColor: "rgba(255, 255, 255, 0.2)",
@@ -74,7 +95,16 @@ const styles = StyleSheet.create({
 
     likes: {
         fontWeight: "900",
-        color: "#000",
+        color: "#ef4444",
+    },
+
+    likeButton: {
+        padding: 5,
+    },
+
+    likeButtonPressed: {
+        opacity: 0.6,
+        transform: [{ scale: 0.95 }],
     },
 
     date: {
@@ -101,4 +131,4 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#888",
     },
-})
+});

@@ -1,78 +1,40 @@
-import { CommentData } from "@/types/comments"
-import { createContext, useReducer, type PropsWithChildren } from "react"
+import useFavorites from "@/hooks/useFavorites";
+import type { CommentData } from "@/types/comments";
+import { createContext, useContext, type PropsWithChildren } from "react";
 
 
 type FavoritesContextValue = {
-    favorites: CommentData[],
-    addFavorite: (comment: CommentData) => void,
-    removeFavorite: (id: number) => void,
-    clearFavorites: () => void,
-    isFavorite: (id: number) => boolean
+    favorites: CommentData[];
+    loading: boolean;
+    addFavorite: (comment: CommentData) => Promise<void>;
+    removeFavorite: (id: number) => Promise<void>;
+    clearFavorites: () => Promise<void>;
+    isFavorite: (id: number) => boolean;
+    putLike: (id: number) => Promise<void>;
+};
 
-}
-
-export const FavoritesContext = createContext<FavoritesContextValue | null>(null)
-
-type FavoritesAction = 
-    | {type: "add"; comment : CommentData} 
-    | {type: "remove"; id: number}
-    | {type: "clear"}
+export const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 
-// Reducer    
-function favoritesReducer(state: CommentData[],action: FavoritesAction) : CommentData[] {
-    switch (action.type) {
-        case "add" :
-            return state.some(item => item.id === action.comment.id)
-                ? state
-                : [...state, action.comment]
-
-        case "remove":
-                return state.filter(item => item.id !== action.id)
-        
-                
-        
-        case "clear":
-            return []
-
-        default:
-            return state
-        
-     }
-
-    }
-
-
-export default function FavoritesProvider({children}: PropsWithChildren) {
-    const [favorites, dispatch] = useReducer(favoritesReducer, [] as CommentData[])
-    
-    function addFavorite(comment: CommentData) {
-        dispatch({type: 'add', comment})
-    }
-
-    function removeFavorite(id: number) {
-        dispatch({type: 'remove', id})
-    }
-
-    function clearFavorites() {
-        dispatch({type: 'clear'})
-    }
-
-    function isFavorite(id: number) {
-        return favorites.some(favorite => favorite.id === id)
-    }
-
-    const contextValue: FavoritesContextValue = {
-        favorites,
-        addFavorite,
-        removeFavorite,
-        clearFavorites,
-        isFavorite
-    }
+export function FavoritesProvider({ children }: PropsWithChildren) {
+    const favoritesData = useFavorites();
 
     return (
-        <FavoritesContext.Provider value = {contextValue}>
+        <FavoritesContext.Provider value={favoritesData}>
             {children}
         </FavoritesContext.Provider>
-    )
+    );
+}
+
+
+export function useFavoritesContext() {
+    const context = useContext(FavoritesContext);
+
+    if (!context) {
+        throw new Error(
+            "useFavoritesContext must be used inside FavoritesProvider"
+        );
+    }
+
+    return context;
 }
